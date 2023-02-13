@@ -1,0 +1,3 @@
+#!/bin/bash
+
+"@CMAKE_COMMAND@" -P "@VARIATE_GIT_HOOKS_TARGET_DIR@/VariatePreCommit.cmake"
