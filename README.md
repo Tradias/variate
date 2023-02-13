@@ -29,7 +29,7 @@ auto func(bool ok)
 static_assert(std::is_same_v<decltype(dehe::make_variant(func())), std::variant<float, const char*>>);
 ```
 
-Play with it on [godbolt](https://godbolt.org/z/ajxavsrnM).
+Play with it on [godbolt](https://godbolt.org/z/xWKeece14).
 
 # Installation
 
