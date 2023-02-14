@@ -27,8 +27,16 @@ void use()
     assert(1.5f == std::get<0>(variant));
 }
 ```
+
+If a get a contraint error due to sizeof or alignof in var() then specify a sufficiently large size during instantation
+of variate:
+
+```c++
+    static constexpr auto& var = dehe::variate<512, 32>;  // size: 512, alignment: 32
+```
 */
 
+#include <cstddef>
 #include <type_traits>
 
 namespace dehe
@@ -78,7 +86,7 @@ using TypesUpToIndex = decltype(get_types_up_to_index(TypeListMap<Key, Index>{})
 template <class T, class Key, detail::size_t Index>
 struct TypeListMapAppender
 {
-    static constexpr auto index = Index;
+    static constexpr detail::size_t index = Index;
 
     // Returns TypeList<Types[0], ..., Types[Index]>.
     friend constexpr auto get_types_up_to_index(const TypeListMap<Key, Index>&)
@@ -114,19 +122,19 @@ struct GetTypesFromMap<Key, I, false>
 // Instantiate a TypeListMapAppender by first recursing to the current size of the TypeList at Key in the global
 // TypeListMap using int-long overload resolution.
 template <class T, class Key, detail::size_t Index = 0>
-constexpr auto type_map_append(long)
+constexpr detail::size_t type_map_append(long)
 {
-    return TypeListMapAppender<T, Key, Index>{};
+    return TypeListMapAppender<T, Key, Index>{}.index;
 }
 
 template <class T, class Key, detail::size_t Index = 0, auto = get_types_up_to_index(TypeListMap<Key, Index>{})>
-constexpr auto type_map_append(int)
+constexpr detail::size_t type_map_append(int)
 {
     return detail::type_map_append<T, Key, Index + 1>(int{});
 }
 
-// Type erased result of a variate function.
-template <class Key, detail::size_t Size, detail::size_t Alignment>
+// Type erased return type of a variate function.
+template <class Key, std::size_t Size, std::size_t Alignment>
 struct Erased
 {
     detail::size_t index;
@@ -140,7 +148,7 @@ struct ToVariant;
 template <template <class...> class List, class Current, class... Next, class... Previous>
 struct ToVariant<List<Current, Next...>, Previous...>
 {
-    template <class Key, detail::size_t Size, detail::size_t Alignment>
+    template <class Key, std::size_t Size, std::size_t Alignment>
     static auto apply(Erased<Key, Size, Alignment>& erased)
     {
         static constexpr detail::size_t index = sizeof...(Previous);
@@ -156,7 +164,7 @@ struct ToVariant<List<Current, Next...>, Previous...>
 template <template <class...> class List, class... T>
 struct ToVariant<List<>, T...>
 {
-    template <class Key, detail::size_t Size, detail::size_t Alignment>
+    template <class Key, std::size_t Size, std::size_t Alignment>
     [[noreturn]] static detail::variant<T...> apply(Erased<Key, Size, Alignment>&)
     {
 // Possible implementation of C++23 std::unreachable
@@ -168,12 +176,12 @@ struct ToVariant<List<>, T...>
     }
 };
 
-template <class Key, detail::size_t Size, detail::size_t Alignment>
+template <class Key, std::size_t Size, std::size_t Alignment>
 struct VariateFn
 {
     // Each invocation of this function will add VariantAlternative to the global TypeList at Key.
     template <class VariantAlternative,
-              detail::size_t Index = detail::type_map_append<std::decay_t<VariantAlternative>, Key>(int{}).index>
+              detail::size_t Index = detail::type_map_append<std::decay_t<VariantAlternative>, Key>(int{})>
     requires(sizeof(std::decay_t<VariantAlternative>) <= Size && alignof(std::decay_t<VariantAlternative>) <= Alignment)
     auto operator()(VariantAlternative&& alternative) const
     {
@@ -186,10 +194,10 @@ struct VariateFn
 };
 }  // namespace detail
 
-template <detail::size_t Size = 256, detail::size_t Alignment = alignof(double), auto Key = [] {}>
+template <std::size_t Size = 256, std::size_t Alignment = alignof(double), auto Key = [] {}>
 inline constexpr detail::VariateFn<decltype(Key), Size, Alignment> variate{};
 
-template <class Key, detail::size_t Size, detail::size_t Alignment>
+template <class Key, std::size_t Size, std::size_t Alignment>
 auto make_variant(detail::Erased<Key, Size, Alignment>&& erased)
 {
     using Types = typename detail::GetTypesFromMap<Key>::Type;
