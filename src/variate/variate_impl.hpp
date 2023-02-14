@@ -65,7 +65,7 @@ using AppendTypeToListT = typename AppendTypeToList<List, T>::Type;
 template <class Key, detail::size_t Index>
 struct TypeListMap
 {
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnon-template-friend"
 #endif
@@ -73,7 +73,7 @@ struct TypeListMap
     // Implementation is provided through friend injection performed by TypeListMapAppender.
     friend constexpr auto get_types_up_to_index(const TypeListMap&);
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 };

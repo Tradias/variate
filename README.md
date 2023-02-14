@@ -67,6 +67,6 @@ The only requirement is a small subset of C++20.
 The following compilers are continuously tested by Github Actions:
 
 * GCC 10,
-* Clang 10
-* MSVc 19.32
+* Clang 12
+* MSVC 19.34
 * AppleClang 13
