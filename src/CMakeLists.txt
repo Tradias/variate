@@ -19,7 +19,7 @@ if(VARIATE_BUILD_TESTS)
 
     target_sources(variate-sources PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/variate.cpp")
 
-    target_link_libraries(variate-sources PUBLIC variate)
+    target_link_libraries(variate-sources PUBLIC variate variate-compile-options variate-coverage-options)
 
     set_target_properties(variate-sources PROPERTIES COMPILE_WARNING_AS_ERROR on)
 endif()

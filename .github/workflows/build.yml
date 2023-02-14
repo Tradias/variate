@@ -41,7 +41,7 @@ jobs:
       run: cmake --preset default -DCMAKE_BUILD_TYPE=${{ matrix.config.build-type }}
 
     - name: Build
-      run: cmake --build --preset default --config ${{ matrix.config.build-type }} --parallel ${{ matrix.config.parallel }}
+      run: cmake --build --preset default --config ${{ matrix.config.build-type }} --parallel ${{ matrix.config.parallel }} -DCMAKE_DISABLE_PRECOMPILE_HEADERS=on
 
     - name: Test
       run: ctest --preset default --build-config ${{ matrix.config.build-type }}
@@ -110,7 +110,8 @@ jobs:
         cmake --preset default -DCMAKE_CXX_COMPILER=$(which clang++-12) \
         "-DCMAKE_CXX_FLAGS=-stdlib=libc++ -stdlib++-isystem /usr/lib/llvm-12/include/c++/v1/ -Wno-unused-command-line-argument" \
         -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld \
-        -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_DISABLE_PRECOMPILE_HEADERS=on
 
     - name: Clang 12 Build
       run: cmake --build --preset default --config Release --parallel $(nproc)
