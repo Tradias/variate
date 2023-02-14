@@ -44,12 +44,7 @@ jobs:
       run: cmake --build --preset default --config ${{ matrix.config.build-type }} --parallel ${{ matrix.config.parallel }}
 
     - name: Test
-      if: matrix.config.os == 'windows-2022'
-      run: build/test/${{ matrix.config.build-type }}/variate-test.exe
-
-    - name: Test
-      if: matrix.config.os == 'macos-11'
-      run: build/test/variate-test
+      run: ctest --preset default --build-config ${{ matrix.config.build-type }}
 
 
   gcc-build:
@@ -80,7 +75,7 @@ jobs:
       run: cmake --build --preset default --parallel $(nproc)
 
     - name: GCC 10 Test
-      run: build/test/variate-test
+      run: ctest --preset default
 
     - name: GCC 10 Install
       run: cmake --install build --prefix build/out
@@ -121,4 +116,4 @@ jobs:
       run: cmake --build --preset default --config Release --parallel $(nproc)
 
     - name: Clang 10 Test
-      run: build/test/variate-test
+      run: ctest --preset default --build-config Release

@@ -21,3 +21,5 @@ if(Boost_FOUND)
 else()
     target_sources(variate-test PRIVATE "no_boost_tests.cpp")
 endif()
+
+add_test(NAME variate-test COMMAND variate-test)
