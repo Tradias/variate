@@ -1,5 +1,5 @@
 # Copyright (c) 2022 Dennis Hezel
-# 
+#
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
 
@@ -44,5 +44,3 @@ target_compile_options(
 if("${CMAKE_GENERATOR}" STRGREATER_EQUAL "Visual Studio")
     target_compile_options(variate-compile-options INTERFACE /MP)
 endif()
-
-target_compile_features(variate-compile-options INTERFACE cxx_std_20)
