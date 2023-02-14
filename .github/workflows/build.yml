@@ -99,21 +99,21 @@ jobs:
 
 
   clang-build:
-    name: 'Ubuntu/20.04/Clang'
-    runs-on: ubuntu-20.04
+    name: 'Ubuntu/22.04/Clang'
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: Clang 11 Configure CMake
+    - name: Clang 12 Configure CMake
       run: |
-        cmake --preset default -DCMAKE_CXX_COMPILER=$(which clang++-11) \
+        cmake --preset default -DCMAKE_CXX_COMPILER=$(which clang++-12) \
         -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_DISABLE_PRECOMPILE_HEADERS=on
 
-    - name: Clang 11 Build
+    - name: Clang 12 Build
       run: cmake --build --preset default --config Release --parallel $(nproc)
 
-    - name: Clang 11 Test
+    - name: Clang 12 Test
       run: ctest --preset default --build-config Release
