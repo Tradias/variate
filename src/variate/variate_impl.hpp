@@ -3,9 +3,6 @@
 // This software is released under the MIT License.
 // https://opensource.org/licenses/MIT
 
-#ifndef DEHE_VARIATE_VARIATE_IMPL_HPP
-#define DEHE_VARIATE_VARIATE_IMPL_HPP
-
 /*
 Usage:
 
@@ -34,7 +31,24 @@ of variate:
 ```c++
     static constexpr auto& var = dehe::variate<512, 32>;  // size: 512, alignment: 32
 ```
+
+
+Implementation details:
+
+* Create a unique type during instantiation of `auto& var = dehe::variate<>` using a lambda in a non-type template
+parameter.
+* For each call to `var(T)`
+    * add T to a global typelist map using the unique type as key.
+    * instantiate a friend function (also known as friend injection) that appends T to the typelist stored at key.
+    * store T and its index in the type-erased wrapper returned from `var(T)`.
+* Move the type-erased wrapper returned from `var(T)` into `make_variant()`.
+* Iterate over the types in the global typelist map and compare their index to the runtime index stored in the
+type-erased wrapper.
+* Upon match, move the value stored in the type-erased wrapper to the final variant.
 */
+
+#ifndef DEHE_VARIATE_VARIATE_IMPL_HPP
+#define DEHE_VARIATE_VARIATE_IMPL_HPP
 
 #include <cstddef>
 #include <type_traits>
