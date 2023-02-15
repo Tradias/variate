@@ -21,5 +21,6 @@ if(VARIATE_BUILD_TESTS)
 
     target_link_libraries(variate-sources PUBLIC variate variate-compile-options variate-coverage-options)
 
-    set_target_properties(variate-sources PROPERTIES COMPILE_WARNING_AS_ERROR on)
+    set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/variate.cpp" PROPERTIES SKIP_UNITY_BUILD_INCLUSION on
+                                                                                     SKIP_PRECOMPILE_HEADERS on)
 endif()

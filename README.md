@@ -69,4 +69,4 @@ The following compilers are continuously tested by Github Actions:
 * GCC 10
 * Clang 12
 * MSVC 19.34
-* AppleClang 13
+* AppleClang 14

@@ -25,7 +25,6 @@ target_compile_options(
     variate-compile-options
     INTERFACE $<$<OR:$<CXX_COMPILER_ID:MSVC>,$<STREQUAL:${CMAKE_CXX_COMPILER_FRONTEND_VARIANT},MSVC>>:
               /W4
-              /WX
               /permissive-
               /Zc:__cplusplus
               /Zc:inline
@@ -36,7 +35,6 @@ target_compile_options(
               /Zc:lambda
               /Zc:throwingNew>
               $<$<OR:$<CXX_COMPILER_ID:GNU>,$<STREQUAL:${CMAKE_CXX_COMPILER_FRONTEND_VARIANT},GNU>>:
-              -Werror
               -Wall
               -Wextra
               -pedantic-errors>)

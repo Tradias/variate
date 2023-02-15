@@ -13,7 +13,8 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_INSTALL_PREFIX": "out",
-                "VARIATE_BUILD_TESTS": "TRUE"
+                "VARIATE_BUILD_TESTS": "TRUE",
+                "CMAKE_COMPILE_WARNING_AS_ERROR": "TRUE"
             }
         }
     ],

@@ -18,6 +18,8 @@ if(Boost_FOUND)
     target_sources(variate-test PRIVATE "boost_tests.cpp")
 
     target_link_libraries(variate-test PRIVATE Boost::headers)
+
+    set_source_files_properties("boost_tests.cpp" PROPERTIES SKIP_UNITY_BUILD_INCLUSION on)
 else()
     target_sources(variate-test PRIVATE "no_boost_tests.cpp")
 endif()
