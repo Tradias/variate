@@ -213,7 +213,7 @@ class Variate
     template <class VariantAlternative,
               detail::size_t Index = detail::type_map_append<std::decay_t<VariantAlternative>, KeyT>(int{})>
     requires(sizeof(std::decay_t<VariantAlternative>) <= Size && alignof(std::decay_t<VariantAlternative>) <= Alignment)
-    auto operator()(VariantAlternative&& alternative) const
+    [[nodiscard]] auto operator()(VariantAlternative&& alternative) const
     {
         detail::Erased<KeyT, Size, Alignment> erased;
         erased.index = Index;
@@ -224,7 +224,7 @@ class Variate
 };
 
 template <class Key, std::size_t Size, std::size_t Alignment>
-auto make_variant(detail::Erased<Key, Size, Alignment>&& erased)
+[[nodiscard]] auto make_variant(detail::Erased<Key, Size, Alignment>&& erased)
 {
     using Types = typename detail::GetTypesFromMap<Key>::Type;
     return detail::ToVariant<Types>::apply(erased);

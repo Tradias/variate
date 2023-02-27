@@ -35,7 +35,7 @@ jobs:
           }
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Configure CMake
       run: cmake --preset default -DCMAKE_BUILD_TYPE=${{ matrix.config.build-type }}
@@ -55,7 +55,7 @@ jobs:
     - name: Install gcovr
       run: sudo apt-get install gcovr
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         # Disabling shallow clone is recommended for improving relevancy of sonarsource reporting
         fetch-depth: 0
@@ -103,7 +103,7 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Clang 12 Configure CMake
       run: |
