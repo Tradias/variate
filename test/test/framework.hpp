@@ -33,17 +33,15 @@ struct Context
     FailedCheck failed_checks[128];
 };
 
-extern Context context;
-
 void run_test_impl(void (*test)(), StringView test_name);
 
-template <auto Test>
+template <void (*Test)()>
 void run_test()
 {
     test::run_test_impl(Test, test::function_pointer_name_v<Test>);
 }
 
-void print_test_results();
+bool finalize_test_results();
 
 void check(bool result, Expression expression, SourceLocation location = TEST_DEHE_CURRENT_LOCATION);
 }  // namespace test

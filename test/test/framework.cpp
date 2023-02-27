@@ -11,7 +11,7 @@
 
 namespace test
 {
-Context context{};
+static Context context{};
 
 void run_test_impl(void (*test)(), StringView test_name)
 {
@@ -30,7 +30,7 @@ void run_test_impl(void (*test)(), StringView test_name)
     ++context.tests_run;
 }
 
-void print_test_results()
+bool finalize_test_results()
 {
     if (context.failed_tests == 0)
     {
@@ -41,6 +41,7 @@ void print_test_results()
         ::printf("======================================\nFailed tests: %i/%i", context.failed_tests,
                  context.tests_run);
     }
+    return context.failed_tests == 0;
 }
 
 void check(bool result, Expression expression, SourceLocation location)

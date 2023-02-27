@@ -17,6 +17,5 @@ int main()
     run_test<&test_too_small_size>();
     run_test<&test_too_small_alignment>();
 
-    print_test_results();
-    return context.failed_tests;
+    return finalize_test_results() ? 0 : 1;
 }
