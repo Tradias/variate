@@ -20,7 +20,7 @@ inline void test_boost_variant()
 {
     auto func = [](int ok)
     {
-        static constexpr auto& var = dehe::variate<>;
+        static constexpr dehe::Variate var;
         if (ok <= 5)
         {
             return var(1.5f);

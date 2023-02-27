@@ -20,7 +20,7 @@ This library attempts to mimic such functionality with minimal boilerplate and (
 ```c++
 auto func(bool ok)
 {
-    static constexpr auto& var = dehe::variate<>;
+    static constexpr dehe::Variate var;
     if (ok)
         return var(1.5f);
     return var("example");

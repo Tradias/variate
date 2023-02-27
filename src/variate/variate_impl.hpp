@@ -9,7 +9,7 @@ Usage:
 ``c++
 auto func(bool ok)
 {
-    static constexpr auto& var = dehe::variate<>;
+    static constexpr dehe::Variate var;
     if (ok)
     {
         return var(1.5f);
@@ -29,7 +29,7 @@ If a get a contraint error due to sizeof or alignof in var() then specify a suff
 of variate:
 
 ```c++
-    static constexpr auto& var = dehe::variate<512, 32>;  // size: 512, alignment: 32
+    static constexpr dehe::Variate<512, 32> var;  // size: 512, alignment: 32
 ```
 
 
@@ -141,7 +141,7 @@ constexpr detail::size_t type_map_append(long)
     return TypeListMapAppender<T, Key, Index>{}.index;
 }
 
-template <class T, class Key, detail::size_t Index = 0, auto = get_types_up_to_index(TypeListMap<Key, Index>{})>
+template <class T, class Key, detail::size_t Index = 0, class = TypesUpToIndex<Key, Index>>
 constexpr detail::size_t type_map_append(int)
 {
     return detail::type_map_append<T, Key, Index + 1>(int{});
@@ -152,7 +152,7 @@ template <class Key, std::size_t Size, std::size_t Alignment>
 struct Erased
 {
     detail::size_t index;
-    alignas(Alignment) char value[Size];
+    alignas(Alignment) unsigned char value[Size];
 };
 
 // Turn a list of types into `detail::variant` based on the runtime index stored in `erased`.
@@ -189,27 +189,27 @@ struct ToVariant<List<>, T...>
 #endif
     }
 };
+}  // namespace detail
 
-template <class Key, std::size_t Size, std::size_t Alignment>
-struct VariateFn
+template <std::size_t Size = 256, std::size_t Alignment = alignof(double), auto Key = [] {}>
+class Variate
 {
-    // Each invocation of this function will add VariantAlternative to the global TypeList at Key.
+  private:
+    using KeyT = decltype(Key);
+
+  public:
     template <class VariantAlternative,
-              detail::size_t Index = detail::type_map_append<std::decay_t<VariantAlternative>, Key>(int{})>
+              detail::size_t Index = detail::type_map_append<std::decay_t<VariantAlternative>, KeyT>(int{})>
     requires(sizeof(std::decay_t<VariantAlternative>) <= Size && alignof(std::decay_t<VariantAlternative>) <= Alignment)
     auto operator()(VariantAlternative&& alternative) const
     {
-        Erased<Key, Size, Alignment> erased;
+        detail::Erased<KeyT, Size, Alignment> erased;
         erased.index = Index;
         using T = std::decay_t<VariantAlternative>;
         ::new (static_cast<void*>(erased.value)) T(static_cast<VariantAlternative&&>(alternative));
         return erased;
     }
 };
-}  // namespace detail
-
-template <std::size_t Size = 256, std::size_t Alignment = alignof(double), auto Key = [] {}>
-inline constexpr detail::VariateFn<decltype(Key), Size, Alignment> variate{};
 
 template <class Key, std::size_t Size, std::size_t Alignment>
 auto make_variant(detail::Erased<Key, Size, Alignment>&& erased)

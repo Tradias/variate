@@ -21,7 +21,7 @@ inline void test_make_single_element_variant()
 {
     auto func = []
     {
-        static constexpr auto& var = dehe::variate<>;
+        static constexpr dehe::Variate var;
         return var(42);
     };
     auto v = dehe::make_variant(func());
@@ -33,7 +33,7 @@ inline void test_make_c_style_array_decay()
 {
     auto func = [](bool ok)
     {
-        static constexpr auto& var = dehe::variate<>;
+        static constexpr dehe::Variate var;
         if (ok)
         {
             return var(1.5f);
@@ -49,7 +49,7 @@ inline void test_make_move_only()
 {
     auto func = [](int ok)
     {
-        static constexpr auto& var = dehe::variate<>;
+        static constexpr dehe::Variate var;
         if (ok <= 5)
         {
             return var(1.5f);
@@ -73,7 +73,7 @@ inline void test_duplicate_type()
 {
     auto func = [](bool ok)
     {
-        static constexpr auto& var = dehe::variate<>;
+        static constexpr dehe::Variate var;
         if (ok)
         {
             return var("1");
@@ -89,17 +89,17 @@ inline void test_duplicate_type()
 
 inline void test_too_small_size()
 {
-    static constexpr auto& var = dehe::variate<sizeof(std::int32_t)>;
+    static constexpr dehe::Variate<sizeof(std::int32_t)> var;
     CHECK(std::is_invocable_v<decltype(var), std::int32_t>);
-    static constexpr auto& var2 = dehe::variate<1>;
+    static constexpr dehe::Variate<1> var2;
     CHECK_FALSE(std::is_invocable_v<decltype(var2), std::int32_t>);
 }
 
 inline void test_too_small_alignment()
 {
-    static constexpr auto& var = dehe::variate<1024, alignof(std::int32_t)>;
+    static constexpr dehe::Variate<1024, alignof(std::int32_t)> var;
     CHECK(std::is_invocable_v<decltype(var), std::int32_t>);
-    static constexpr auto& var2 = dehe::variate<1024, 1>;
+    static constexpr dehe::Variate<1024, 1> var2;
     CHECK_FALSE(std::is_invocable_v<decltype(var2), std::int32_t>);
 }
 }  // namespace test
