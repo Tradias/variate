@@ -42,6 +42,8 @@ CMakeSettings.json
 .vscode
 cmake-variants.yaml
 CMakeUserPresets.json
+.clangd
+.cache
 
 # Codeblocks
 *.layout
