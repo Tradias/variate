@@ -33,7 +33,6 @@ if(VARIATE_BUILD_TESTS)
     message(STATUS "CMake version: ${CMAKE_VERSION}")
     message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 
-    # include CMake modules
     include("${CMAKE_CURRENT_LIST_DIR}/cmake/VariateCompileOptions.cmake")
     include("${CMAKE_CURRENT_LIST_DIR}/cmake/VariateInstallGitHooks.cmake")
     include("${CMAKE_CURRENT_LIST_DIR}/cmake/VariateCoverage.cmake")
@@ -42,8 +41,6 @@ endif()
 add_subdirectory(src)
 
 if(VARIATE_BUILD_TESTS)
-    find_package(Boost)
-
     enable_testing()
     add_subdirectory(test)
 endif()

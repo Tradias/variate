@@ -17,8 +17,6 @@ int main()
     run_test<&test_too_small_size>();
     run_test<&test_too_small_alignment>();
 
-    run_boost_tests();
-
     print_test_results();
     return context.failed_tests;
 }

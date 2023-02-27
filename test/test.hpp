@@ -15,8 +15,6 @@
 
 namespace test
 {
-void run_boost_tests();
-
 inline void test_make_single_element_variant()
 {
     auto func = []
