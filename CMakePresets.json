@@ -16,6 +16,17 @@
                 "VARIATE_BUILD_TESTS": "TRUE",
                 "CMAKE_COMPILE_WARNING_AS_ERROR": "TRUE"
             }
+        },
+        {
+            "name": "examples",
+            "displayName": "Examples",
+            "description": "Examples require libunifex. This preset uses vcpkg to obtain it.",
+            "binaryDir": "${sourceDir}/build-examples",
+            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+            "cacheVariables": {
+                "VCPKG_OVERLAY_PORTS": "${sourceDir}/deps",
+                "VARIATE_BUILD_EXAMPLES": "TRUE"
+            }
         }
     ],
     "buildPresets": [

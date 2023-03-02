@@ -20,7 +20,8 @@ set(VARIATE_CMAKE_CONFIG_INSTALL_DIR
     CACHE STRING "Install directory for CMake config files")
 
 # maintainer options
-option(VARIATE_BUILD_TESTS "Build tests and examples" off)
+option(VARIATE_BUILD_TESTS "Build tests" off)
+option(VARIATE_BUILD_EXAMPLES "Build examples" off)
 option(VARIATE_TEST_COVERAGE "Compile tests with --coverage" off)
 set(VARIATE_COVERAGE_OUTPUT_FILE
     "${CMAKE_CURRENT_BINARY_DIR}/sonarqube-coverage.xml"
@@ -29,7 +30,7 @@ option(VARIATE_ENABLE_DYNAMIC_ANALYSIS "Compile tests with -fsanitize=undefined,
 
 set(VARIATE_PROJECT_ROOT "${CMAKE_CURRENT_LIST_DIR}")
 
-if(VARIATE_BUILD_TESTS)
+if(VARIATE_BUILD_TESTS OR VARIATE_BUILD_EXAMPLES)
     message(STATUS "CMake version: ${CMAKE_VERSION}")
     message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 
@@ -43,6 +44,10 @@ add_subdirectory(src)
 if(VARIATE_BUILD_TESTS)
     enable_testing()
     add_subdirectory(test)
+endif()
+
+if(VARIATE_BUILD_EXAMPLES)
+    add_subdirectory(example)
 endif()
 
 if(VARIATE_INSTALL)

@@ -31,6 +31,43 @@ static_assert(std::is_same_v<decltype(dehe::make_variant(func())), std::variant<
 
 Play with it on [godbolt](https://godbolt.org/z/hdadaqjdT).
 
+# Motivation
+
+With the advent of [std::execution](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2300r6.html), C++ developers are faced with more and more unnamable types. All sender types are considered implementation details and can only be identified using something like `decltype(std::execution::just(42))`. Additionally, we often must write functional-style code when dealing with `std::execution`, meaning we must return a common sender type from our functions. This makes it difficult to express conditional branches. [Libunifex](https://github.com/facebookexperimental/libunifex) provides a `variant_sender` class template that we can hook into this library to ease the process:
+
+```c++
+// Adapt libunifex to this library
+static constexpr auto variant_sender_factory = []<std::size_t, class... T, class Arg>(Arg && arg)
+{
+    return unifex::variant_sender<T...>{std::forward<Arg>(arg)};
+};
+auto make_variant_sender(auto&& erased)
+{
+    return dehe::make(std::forward<decltype(erased)>(erased), variant_sender_factory);
+}
+
+// Our actual business logic containing a branch
+auto business_logic(bool okbusiness_logic)
+{
+    static constexpr dehe::Variate var;
+    if (ok)
+    {
+        return var(unifex::just(5));
+    }
+    return var(unifex::just() | unifex::then(
+                                    []
+                                    {
+                                        return 42;
+                                    }));
+}
+
+// Imagine some chain of senders:
+    | unifex::let_value([](bool ok)
+                        {
+                            return make_variant_sender(business_logic(ok));
+                        });
+```
+
 # Installation
 
 Copy the headers from `src/variate` into your project.

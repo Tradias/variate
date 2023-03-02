@@ -58,16 +58,8 @@ namespace dehe
 {
 namespace detail
 {
-// Variant type. This could for example be replaced with:
-//
-// using boost::variant2::in_place_index;
-// using boost::variant2::variant;
-// using std::size_t;
-//
-// to use Boost.Variant2
-using std::in_place_index;
+// Variant index type
 using std::size_t;
-using std::variant;
 
 template <class...>
 struct TypeList
@@ -174,24 +166,25 @@ struct ToVariant;
 template <template <class...> class List, class Current, class... Next, class... Previous>
 struct ToVariant<List<Current, Next...>, Previous...>
 {
-    template <class Key, std::size_t Size, std::size_t Alignment>
-    static auto apply(Erased<Key, Size, Alignment>& erased)
+    template <class Key, std::size_t Size, std::size_t Alignment, class Factory>
+    static auto apply(Erased<Key, Size, Alignment>& erased, Factory&& factory)
     {
         static constexpr detail::size_t index = sizeof...(Previous);
         if (index == erased.index)
         {
-            return detail::variant<Previous..., Current, Next...>{
-                detail::in_place_index<index>, static_cast<Current&&>(*reinterpret_cast<Current*>(erased.value))};
+            return static_cast<Factory&&>(factory).template operator()<index, Previous..., Current, Next...>(
+                static_cast<Current&&>(*reinterpret_cast<Current*>(erased.value)));
         }
-        return ToVariant<List<Next...>, Previous..., Current>::apply(erased);
+        return ToVariant<List<Next...>, Previous..., Current>::apply(erased, static_cast<Factory&&>(factory));
     }
 };
 
-template <template <class...> class List, class... T>
-struct ToVariant<List<>, T...>
+template <template <class...> class List, class First, class... Rest>
+struct ToVariant<List<>, First, Rest...>
 {
-    template <class Key, std::size_t Size, std::size_t Alignment>
-    [[noreturn]] static detail::variant<T...> apply(Erased<Key, Size, Alignment>&)
+    template <class Key, std::size_t Size, std::size_t Alignment, class Factory>
+    [[noreturn]] static auto apply(Erased<Key, Size, Alignment>&, Factory&& factory)
+        -> decltype(static_cast<Factory&&>(factory).template operator()<0, First, Rest...>(std::declval<First>()))
     {
 // Possible implementation of C++23 std::unreachable
 #ifdef __GNUC__
@@ -199,6 +192,15 @@ struct ToVariant<List<>, T...>
 #elif defined(_MSC_VER)
         __assume(false);
 #endif
+    }
+};
+
+struct StdVariantFactory
+{
+    template <detail::size_t Index, class... T, class Arg>
+    auto operator()(Arg&& arg)
+    {
+        return std::variant<T...>{std::in_place_index<Index>, static_cast<Arg&&>(arg)};
     }
 };
 }  // namespace detail
@@ -223,11 +225,17 @@ class Variate
     }
 };
 
+template <class Key, std::size_t Size, std::size_t Alignment, class Factory>
+[[nodiscard]] auto make(detail::Erased<Key, Size, Alignment>&& erased, Factory&& factory)
+{
+    using Types = typename detail::GetTypesFromMap<Key>::Type;
+    return detail::ToVariant<Types>::apply(erased, static_cast<Factory&&>(factory));
+}
+
 template <class Key, std::size_t Size, std::size_t Alignment>
 [[nodiscard]] auto make_variant(detail::Erased<Key, Size, Alignment>&& erased)
 {
-    using Types = typename detail::GetTypesFromMap<Key>::Type;
-    return detail::ToVariant<Types>::apply(erased);
+    return dehe::make(std::move(erased), detail::StdVariantFactory{});
 }
 }  // namespace dehe
 
