@@ -228,7 +228,7 @@ struct StdVariantFactory
 };
 }  // namespace detail
 
-template <std::size_t Size = 256, std::size_t Alignment = alignof(double), auto Key = [] {}>
+template <std::size_t Size = 256, std::size_t Alignment = alignof(double), auto Key = []() -> void {}>
 class Variate
 {
   private:
@@ -248,7 +248,7 @@ class Variate
     }
 };
 
-template <class T, auto Key = [] {}>
+template <class T, auto Key = []() -> void {}>
 struct DependentVariate : Variate<256, alignof(double), Key>
 {
     template <std::size_t Size = 256, std::size_t Alignment = alignof(double)>
