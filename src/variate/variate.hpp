@@ -218,12 +218,6 @@ struct ToVariant<List<>, First, Rest...>
     }
 };
 
-template <class, auto L = [] {}>
-struct DependentUniqueType
-{
-    static constexpr auto value = L;
-};
-
 struct StdVariantFactory
 {
     template <detail::size_t Index, class... T, class Arg>
@@ -254,11 +248,11 @@ class Variate
     }
 };
 
-template <class... T>
-struct DependentVariate : Variate<256, alignof(double), detail::DependentUniqueType<detail::TypeList<T...>>::value>
+template <class T, auto Key = [] {}>
+struct DependentVariate : Variate<256, alignof(double), Key>
 {
     template <std::size_t Size = 256, std::size_t Alignment = alignof(double)>
-    using Type = Variate<Size, alignof(double), detail::DependentUniqueType<detail::TypeList<T...>>::value>;
+    using Type = Variate<Size, Alignment, Key>;
 };
 
 // Factory must be a callable type with signature:
