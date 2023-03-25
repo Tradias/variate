@@ -49,7 +49,7 @@ auto make_variant_sender(auto&& erased)
 // Our actual business logic containing branches. Without this library we would need to spell out the return type:
 // `unifex::variant_sender<decltype(unifex::just(5)), decltype(unifex::just() | unifex::then(lambda))>`
 // and move the lambda into a separate place.
-auto business_logic(bool okbusiness_logic)
+auto business_logic(bool ok)
 {
     static constexpr dehe::Variate var;
     if (ok)

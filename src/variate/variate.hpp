@@ -35,13 +35,12 @@ of variate:
 
 Implementation details:
 
-* Create a unique type during instantiation of `constexpr dehe::Variate var` using a lambda as a non-type template
-parameter.
-* For each call to `var(T)`
+* Create a unique type during instantiation of `constexpr dehe::Variate var` by using a lambda.
+* For each call to `var(T v)`
     * add T to a global typelist map using the unique type as key.
-    * instantiate a friend function (also known as friend injection) that appends T to the typelist stored at key.
-    * store T and its index in the type-erased wrapper returned from `var(T)`.
-* Move the type-erased wrapper returned from `var(T)` into `make_variant()`.
+    * instantiate a friend function that appends T to the typelist stored at key.
+    * store v and its index in the type-erased wrapper returned from `var(T v)`.
+* Move the type-erased wrapper returned from `var(T v)` into `make_variant()`.
 * Iterate over the types in the global typelist map and compare their index to the runtime index stored in the
 type-erased wrapper.
 * Upon match, move the value stored in the type-erased wrapper to the final variant.
@@ -79,7 +78,7 @@ struct AppendTypeToList<List<U...>, T>
 template <class List, class T>
 using AppendTypeToListT = typename AppendTypeToList<List, T>::Type;
 
-// A global type map from Key to TypeList<Types...>
+// Conceptually this acts as a global type map from Key to TypeList<Types...>
 template <class Key, detail::size_t Index>
 struct TypeListMap
 {
@@ -99,7 +98,7 @@ struct TypeListMap
 template <class Key, detail::size_t Index>
 using TypesUpToIndex = decltype(get_types_up_to_index(TypeListMap<Key, Index>{}));
 
-// Instantiating this type will append T to the TypeList<Types...> at Key in the global TypeListMap if Index is equal to
+// Instantiating this type will append T to the TypeList<Types...> at Key in TypeListMap if Index is equal to
 // sizeof...(Types), otherwise it will fail to compile.
 template <class T, class Key, detail::size_t Index>
 struct TypeListMapAppender
@@ -125,7 +124,7 @@ struct TypeListMapAppender
 template <class Key, detail::size_t Index>
 concept ValidTypeListMapIndex = requires(const TypeListMap<Key, Index>& v) { get_types_up_to_index(v); };
 
-// Get TypeList<Types...> for a Key in the global TypeListMap.
+// Get TypeList<Types...> for a Key in TypeListMap.
 template <class Key, detail::size_t I = 0, bool = ValidTypeListMapIndex<Key, I + 1>>
 struct GetTypesFromMap : GetTypesFromMap<Key, I + 1>
 {
@@ -137,8 +136,8 @@ struct GetTypesFromMap<Key, I, false>
     using Type = TypesUpToIndex<Key, I>;
 };
 
-// Instantiate a TypeListMapAppender by first recursing to the current size of the TypeList at Key in the global
-// TypeListMap using int-long overload resolution.
+// Instantiate a TypeListMapAppender by first recursing to the current size of the TypeList at Key in TypeListMap using
+// int-long overload resolution and sfinae on TypesUpToIndex.
 template <class T, class Key, detail::size_t Index = 0>
 constexpr detail::size_t type_map_append(long)
 {
@@ -225,6 +224,12 @@ class Variate
     }
 };
 
+// Factory must be a callable type with signature:
+//
+// template <detail::size_t Index, class... T, class Arg>
+// auto operator()(Arg&& arg);
+//
+// Where Index is the index of the runtime value Arg in the types of the resulting variant<T...>.
 template <class Key, std::size_t Size, std::size_t Alignment, class Factory>
 [[nodiscard]] auto make(detail::Erased<Key, Size, Alignment>&& erased, Factory&& factory)
 {
@@ -235,7 +240,7 @@ template <class Key, std::size_t Size, std::size_t Alignment, class Factory>
 template <class Key, std::size_t Size, std::size_t Alignment>
 [[nodiscard]] auto make_variant(detail::Erased<Key, Size, Alignment>&& erased)
 {
-    return dehe::make(std::move(erased), detail::StdVariantFactory{});
+    return dehe::make(static_cast<detail::Erased<Key, Size, Alignment>&&>(erased), detail::StdVariantFactory{});
 }
 }  // namespace dehe
 
