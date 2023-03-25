@@ -100,6 +100,58 @@ inline void test_too_small_alignment()
     static constexpr dehe::Variate<1024, 1> var2;
     CHECK_FALSE(std::is_invocable_v<decltype(var2), std::int32_t>);
 }
+
+inline void test_dependent_variate()
+{
+    auto func = []<typename T>(T param)
+    {
+        static constexpr typename dehe::DependentVariate<T>::template Type<> var;
+        if constexpr (std::is_integral_v<T>)
+        {
+            return var(42);
+        }
+        else
+        {
+            if (param > 0.0)
+            {
+                return var(1.0);
+            }
+            return var("Hello World");
+        }
+    };
+    auto v = dehe::make_variant(func(2));
+    CHECK(std::is_same_v<decltype(v), std::variant<int>>);
+    CHECK_EQ(42, std::get<0>(v));
+    auto v2 = dehe::make_variant(func(2.f));
+    CHECK(std::is_same_v<decltype(v2), std::variant<double, const char*>>);
+    CHECK_EQ(1.0, std::get<0>(v2));
+}
+
+inline void test_dependent_variate_shorthand()
+{
+    auto func = []<typename T>(T param)
+    {
+        static constexpr dehe::DependentVariate<T> var;
+        if constexpr (std::is_integral_v<T>)
+        {
+            return var(42);
+        }
+        else
+        {
+            if (param > 0.0)
+            {
+                return var(1.0);
+            }
+            return var("Hello World");
+        }
+    };
+    auto v = dehe::make_variant(func(2));
+    CHECK(std::is_same_v<decltype(v), std::variant<int>>);
+    CHECK_EQ(42, std::get<0>(v));
+    auto v2 = dehe::make_variant(func(2.f));
+    CHECK(std::is_same_v<decltype(v2), std::variant<double, const char*>>);
+    CHECK_EQ(1.0, std::get<0>(v2));
+}
 }  // namespace test
 
 #endif  // DEHE_TEST_TEST_HPP

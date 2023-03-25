@@ -25,11 +25,34 @@ void use()
 }
 ```
 
+
 If a get a contraint error due to sizeof or alignof in var() then specify a sufficiently large size during instantation
 of variate:
 
 ```c++
     static constexpr dehe::Variate<512, 32> var;  // size: 512, alignment: 32
+```
+
+
+In template functions `Variate` must be made dependent on the template parameter:
+
+```c++
+template <typename T>
+auto func(T param) {
+
+    static constexpr dehe::DependentVariate<T> var;
+
+    // or if sizeof/alignof customization is required:
+    //static constexpr typename dehe::DependentVariate<T>::template Type<512> var;
+
+    if constexpr (std::is_integral_v<T>) {
+        return var(1);
+    } else if (param > 0.0) {
+        return var(1.0);
+    } else {
+        return var("Hello World");
+    }
+}
 ```
 
 
@@ -158,7 +181,8 @@ struct Erased
     alignas(Alignment) unsigned char value[Size];
 };
 
-// Turn a list of types into `detail::variant` based on the runtime index stored in `erased`.
+// Turn a list of types into `std::variant` (or any other type produced by `factory`) based on the runtime index and
+// value stored in `erased`.
 template <class, class...>
 struct ToVariant;
 
@@ -194,6 +218,13 @@ struct ToVariant<List<>, First, Rest...>
     }
 };
 
+template <class...>
+struct DependentUniqueType
+{
+    template <auto L = [] {}>
+    static constexpr auto value = L;
+};
+
 struct StdVariantFactory
 {
     template <detail::size_t Index, class... T, class Arg>
@@ -222,6 +253,13 @@ class Variate
         ::new (static_cast<void*>(erased.value)) T(static_cast<VariantAlternative&&>(alternative));
         return erased;
     }
+};
+
+template <class... T>
+struct DependentVariate : Variate<256, alignof(double), detail::DependentUniqueType<T...>::template value<>>
+{
+    template <std::size_t Size = 256, std::size_t Alignment = alignof(double)>
+    using Type = Variate<Size, alignof(double), detail::DependentUniqueType<T...>::template value<>>;
 };
 
 // Factory must be a callable type with signature:
